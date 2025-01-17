@@ -77,7 +77,7 @@ stages:
           steps:
           - task: AzureKeyVault@2
             inputs:
-              azureSubscription: 'SMD-KeyVaul'
+              azureSubscription: 'SMD-KeyVault'
               KeyVaultName: 'test-key-vault-v2'
               SecretsFilter: 'SMD--AzureSignalRConnectionString,SMD--YouTubeApiKey,ProjectDb--SQL-DefaultConnectionString'
               RunAsPreJob: false
@@ -129,7 +129,7 @@ stages:
           steps:
           - task: AzureKeyVault@2
             inputs:
-              azureSubscription: 'SMD-KeyVaul'
+              azureSubscription: 'SMD-KeyVault'
               KeyVaultName: 'prod-key-vault-v1'
               SecretsFilter: 'SMD--AzureSignalRConnectionString,SMD--YouTubeApiKey,ProjectDb--SQL-DefaultConnectionString'
               RunAsPreJob: false
