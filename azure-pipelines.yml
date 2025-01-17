@@ -91,11 +91,20 @@ stages:
               SecretsFilter: 'SMD--AzureSignalRConnectionString,SMD--YouTubeApiKey,ProjectDb--SQL-DefaultConnectionString'
               RunAsPreJob: false
 
+          - task: PowerShell@2
+            displayName: 'Debug - List Artifact Structure'
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "Current directory: $(Get-Location)"
+                Write-Host "Listing Pipeline.Workspace content:"
+                Get-ChildItem -Path $(Pipeline.Workspace)/drop -Recurse | ForEach-Object { $_.FullName }
+                
           - task: FileTransform@1
             inputs:
               folderPath: '$(Pipeline.Workspace)/drop'
               fileType: 'json'
-              targetFiles: '**/local.settings.json'
+              targetFiles: '**/*.settings.json'
               
           - task: AzureAppServiceManage@0
             displayName: 'Stop Function App'
