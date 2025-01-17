@@ -39,12 +39,21 @@ stages:
         projects: '$(solution)'
         arguments: '--configuration $(buildConfiguration)'
 
+    - task: PowerShell@2
+      displayName: 'Debug - List Directory Structure'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Listing all .json files:"
+          Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Filter *.json -Recurse | ForEach-Object { $_.FullName }
+          
     - task: FileTransform@1
       displayName: 'Transform local.settings.json'
       inputs:
         folderPath: '$(System.DefaultWorkingDirectory)'
         fileType: 'json'
-        targetFiles: '**/DopamineDetoxFunction/local.settings.json'
+        targetFiles: '**/local.settings.json'
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish'
