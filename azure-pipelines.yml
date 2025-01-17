@@ -92,19 +92,20 @@ stages:
               RunAsPreJob: false
 
           - task: PowerShell@2
-            displayName: 'Debug - List Artifact Structure'
+            displayName: 'Extract Build Artifact'
             inputs:
               targetType: 'inline'
               script: |
-                Write-Host "Current directory: $(Get-Location)"
-                Write-Host "Listing Pipeline.Workspace content:"
-                Get-ChildItem -Path $(Pipeline.Workspace)/drop -Recurse | ForEach-Object { $_.FullName }
+                Write-Host "Extracting build artifact"
+                Expand-Archive -Path "$(Pipeline.Workspace)/drop/s.zip" -DestinationPath "$(Pipeline.Workspace)/drop/extracted" -Force
+                Write-Host "Listing extracted contents:"
+                Get-ChildItem -Path "$(Pipeline.Workspace)/drop/extracted" -Recurse | ForEach-Object { $_.FullName }
                 
           - task: FileTransform@1
             inputs:
-              folderPath: '$(Pipeline.Workspace)/drop'
+              folderPath: '$(Pipeline.Workspace)/drop/extracted'
               fileType: 'json'
-              targetFiles: '**/*.settings.json'
+              targetFiles: '**/local.settings.json'
               
           - task: AzureAppServiceManage@0
             displayName: 'Stop Function App'
@@ -119,7 +120,7 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appName: 'smd-function-test'
               appType: 'functionAppLinux'
-              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              package: '$(Pipeline.Workspace)/drop/extracted'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
               
