@@ -44,7 +44,7 @@ stages:
       inputs:
         folderPath: '$(System.DefaultWorkingDirectory)'
         fileType: 'json'
-        targetFiles: '**/local.settings.json'
+        targetFiles: '**/DopamineDetoxFunction/local.settings.json'
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish'
