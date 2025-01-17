@@ -39,22 +39,6 @@ stages:
         projects: '$(solution)'
         arguments: '--configuration $(buildConfiguration)'
 
-    - task: PowerShell@2
-      displayName: 'Debug - List Directory Structure'
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host "Current directory: $(Get-Location)"
-          Write-Host "Listing all .json files:"
-          Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Filter *.json -Recurse | ForEach-Object { $_.FullName }
-          
-    - task: FileTransform@1
-      displayName: 'Transform local.settings.json'
-      inputs:
-        folderPath: '$(System.DefaultWorkingDirectory)'
-        fileType: 'json'
-        targetFiles: '**/local.settings.json'
-
     - task: FileTransform@1
       displayName: 'Transform local.settings.json'
       inputs:
@@ -154,6 +138,10 @@ stages:
               package: '$(Pipeline.Workspace)/drop/extracted'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
+              appSettings: |
+                -FUNCTIONS_WORKER_RUNTIME "dotnet-isolated"
+                -DOTNET_ISOLATED_RUNTIME_VERSION "8.0"
+                -FUNCTIONS_EXTENSION_VERSION "~4"
               
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
@@ -184,9 +172,26 @@ stages:
               SecretsFilter: 'SMD--AzureSignalRConnectionString,SMD--YouTubeApiKey,ProjectDb--SQL-DefaultConnectionString'
               RunAsPreJob: false
 
+          - task: PowerShell@2
+            displayName: 'Extract Build Artifact'
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "Extracting build artifact"
+                $zipPath = "$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip"
+                Write-Host "Looking for zip file at: $zipPath"
+                if (Test-Path $zipPath) {
+                    Expand-Archive -Path $zipPath -DestinationPath "$(Pipeline.Workspace)/drop/extracted" -Force
+                    Write-Host "Listing extracted contents:"
+                    Get-ChildItem -Path "$(Pipeline.Workspace)/drop/extracted" -Recurse | ForEach-Object { $_.FullName }
+                } else {
+                    Write-Error "Zip file not found at $zipPath"
+                    exit 1
+                }
+                
           - task: FileTransform@1
             inputs:
-              folderPath: '$(Pipeline.Workspace)/drop'
+              folderPath: '$(Pipeline.Workspace)/drop/extracted'
               fileType: 'json'
               targetFiles: '**/local.settings.json'
               
@@ -203,9 +208,13 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appName: 'smd-function-prod'
               appType: 'functionAppLinux'
-              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              package: '$(Pipeline.Workspace)/drop/extracted'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
+              appSettings: |
+                -FUNCTIONS_WORKER_RUNTIME "dotnet-isolated"
+                -DOTNET_ISOLATED_RUNTIME_VERSION "8.0"
+                -FUNCTIONS_EXTENSION_VERSION "~4"
               
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
