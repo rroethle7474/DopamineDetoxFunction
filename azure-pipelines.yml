@@ -1,0 +1,166 @@
+trigger:
+  - main
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NuGetAuthenticate@1
+      displayName: 'NuGet Authenticate'
+    
+    - task: UseDotNet@2
+      inputs:
+        version: '8.x'
+        includePreviewVersions: false
+        
+    - task: NuGetToolInstaller@1
+      displayName: 'Install NuGet'
+
+    - task: NuGetCommand@2
+      displayName: 'NuGet restore'
+      inputs:
+        command: 'restore'
+        restoreSolution: '$(solution)'
+        feedsToUse: 'config'
+        nugetConfigPath: 'nuget.config'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: 'build'
+        projects: '$(solution)'
+        arguments: '--configuration $(buildConfiguration)'
+
+    - task: FileTransform@1
+      displayName: 'Transform local.settings.json'
+      inputs:
+        folderPath: '$(System.DefaultWorkingDirectory)'
+        fileType: 'json'
+        targetFiles: '**/local.settings.json'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '**/DopamineDetoxFunction.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+        zipAfterPublish: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'drop'
+
+- stage: DeployToTest
+  dependsOn: Build
+  condition: succeeded()
+  variables:
+    - group: SMD-Test-Variables
+  jobs:
+  - deployment: Deploy
+    environment: 'test'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureKeyVault@2
+            inputs:
+              azureSubscription: 'SMD-KeyVaul'
+              KeyVaultName: 'test-key-vault-v2'
+              SecretsFilter: 'SMD--AzureSignalRConnectionString,SMD--YouTubeApiKey,ProjectDb--SQL-DefaultConnectionString'
+              RunAsPreJob: false
+
+          - task: FileTransform@1
+            inputs:
+              folderPath: '$(Pipeline.Workspace)/drop'
+              fileType: 'json'
+              targetFiles: '**/local.settings.json'
+              
+          - task: AzureAppServiceManage@0
+            displayName: 'Stop Function App'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              Action: 'Stop Azure App Service'
+              WebAppName: 'smd-function-test'
+              SpecifySlotOrASE: false
+              
+          - task: AzureFunctionApp@2
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              appName: 'smd-function-test'
+              appType: 'functionAppLinux'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              deploymentMethod: 'auto'
+              enableGoogleAnalytics: false
+              
+          - task: AzureAppServiceManage@0
+            displayName: 'Start Function App'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              Action: 'Start Azure App Service'
+              WebAppName: 'smd-function-test'
+              SpecifySlotOrASE: false
+
+- stage: DeployToProduction
+  dependsOn: DeployToTest
+  condition: succeeded()
+  variables:
+    - group: SMD-Prod-Variables
+  jobs:
+  - deployment: Deploy
+    environment: 'production'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureKeyVault@2
+            inputs:
+              azureSubscription: 'SMD-KeyVaul'
+              KeyVaultName: 'prod-key-vault-v1'
+              SecretsFilter: 'SMD--AzureSignalRConnectionString,SMD--YouTubeApiKey,ProjectDb--SQL-DefaultConnectionString'
+              RunAsPreJob: false
+
+          - task: FileTransform@1
+            inputs:
+              folderPath: '$(Pipeline.Workspace)/drop'
+              fileType: 'json'
+              targetFiles: '**/local.settings.json'
+              
+          - task: AzureAppServiceManage@0
+            displayName: 'Stop Function App'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              Action: 'Stop Azure App Service'
+              WebAppName: 'smd-function-prod'
+              SpecifySlotOrASE: false
+              
+          - task: AzureFunctionApp@2
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              appName: 'smd-function-prod'
+              appType: 'functionAppLinux'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              deploymentMethod: 'auto'
+              enableGoogleAnalytics: false
+              
+          - task: AzureAppServiceManage@0
+            displayName: 'Start Function App'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              Action: 'Start Azure App Service'
+              WebAppName: 'smd-function-prod'
+              SpecifySlotOrASE: false
