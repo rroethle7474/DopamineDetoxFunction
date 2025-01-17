@@ -121,9 +121,16 @@ stages:
               targetType: 'inline'
               script: |
                 Write-Host "Extracting build artifact"
-                Expand-Archive -Path "$(Pipeline.Workspace)/drop/s.zip" -DestinationPath "$(Pipeline.Workspace)/drop/extracted" -Force
-                Write-Host "Listing extracted contents:"
-                Get-ChildItem -Path "$(Pipeline.Workspace)/drop/extracted" -Recurse | ForEach-Object { $_.FullName }
+                $zipPath = "$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip"
+                Write-Host "Looking for zip file at: $zipPath"
+                if (Test-Path $zipPath) {
+                    Expand-Archive -Path $zipPath -DestinationPath "$(Pipeline.Workspace)/drop/extracted" -Force
+                    Write-Host "Listing extracted contents:"
+                    Get-ChildItem -Path "$(Pipeline.Workspace)/drop/extracted" -Recurse | ForEach-Object { $_.FullName }
+                } else {
+                    Write-Error "Zip file not found at $zipPath"
+                    exit 1
+                }
                 
           - task: FileTransform@1
             inputs:
