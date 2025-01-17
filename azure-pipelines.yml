@@ -64,6 +64,13 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
         zipAfterPublish: true
 
+    - task: CopyFiles@2
+      displayName: 'Copy Settings File'
+      inputs:
+        Contents: '**/local.settings.json'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        OverWrite: true
+
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
