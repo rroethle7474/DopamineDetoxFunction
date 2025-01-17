@@ -55,6 +55,13 @@ stages:
         fileType: 'json'
         targetFiles: '**/local.settings.json'
 
+    - task: FileTransform@1
+      displayName: 'Transform local.settings.json'
+      inputs:
+        folderPath: '$(System.DefaultWorkingDirectory)'
+        fileType: 'json'
+        targetFiles: '**/local.settings.json'
+
     - task: DotNetCoreCLI@2
       displayName: 'Publish'
       inputs:
@@ -62,14 +69,24 @@ stages:
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-        zipAfterPublish: true
+        zipAfterPublish: false
 
     - task: CopyFiles@2
-      displayName: 'Copy Settings File'
+      displayName: 'Ensure Settings Included'
       inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
         Contents: '**/local.settings.json'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction'
         OverWrite: true
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive Files'
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction.zip'
+        replaceExistingArchive: true
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
