@@ -50,14 +50,14 @@ stages:
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
         flattenFolders: false
 
-    # Modified publish task
+    # Modified publish task with FunctionsPreserveMetadata
     - task: DotNetCoreCLI@2
       displayName: 'Publish'
       inputs:
         command: 'publish'
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish /p:GenerateRuntimeConfigurationFiles=true'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish /p:GenerateRuntimeConfigurationFiles=true /p:FunctionsPreserveMetadata=true'
         modifyOutputPath: false
         zipAfterPublish: false
 
