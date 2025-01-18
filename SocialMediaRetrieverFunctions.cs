@@ -4,6 +4,7 @@ using DopamineDetoxFunction.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -90,7 +91,7 @@ namespace DopamineDetoxFunction
 
 
         [Function("GetYTDefaultSearchResults")]
-        public async Task<IActionResult> GetYTDefaultSearchResults([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
+        public async Task<IActionResult> GetYTDefaultSearchResults([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request. GetYTDefaultSearchResults");
             var socialMediaDataResponse = await RetrieveYouTubeDefaultData(req.Query["isNew"]);
