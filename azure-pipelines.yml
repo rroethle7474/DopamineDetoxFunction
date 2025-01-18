@@ -39,13 +39,6 @@ stages:
         projects: '$(solution)'
         arguments: '--configuration $(buildConfiguration)'
 
-    - task: FileTransform@1
-      displayName: 'Transform local.settings.json'
-      inputs:
-        folderPath: '$(System.DefaultWorkingDirectory)'
-        fileType: 'json'
-        targetFiles: '**/local.settings.json'
-
     - task: DotNetCoreCLI@2
       displayName: 'Publish'
       inputs:
@@ -83,25 +76,52 @@ stages:
               RunAsPreJob: false
 
           - task: PowerShell@2
-            displayName: 'Extract Build Artifact'
+            displayName: 'Extract Settings for Transform'
             inputs:
               targetType: 'inline'
               script: |
-                Write-Host "Extracting build artifact"
                 $zipPath = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
                 Write-Host "Found zip file at: $zipPath"
-                if (Test-Path $zipPath) {
-                    Write-Host "Zip file exists"
-                } else {
-                    Write-Error "Zip file not found at $zipPath"
-                    exit 1
-                }
                 
+                # Create a temp directory
+                $tempDir = Join-Path "$(Pipeline.Workspace)" "temp"
+                New-Item -ItemType Directory -Path $tempDir -Force
+                
+                # Extract just the settings file
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                $zip = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+                $settingsEntry = $zip.Entries | Where-Object { $_.Name -eq "local.settings.json" }
+                if ($settingsEntry) {
+                    $settingsEntry.ExtractToFile([System.IO.Path]::Combine($tempDir, "local.settings.json"), $true)
+                }
+                $zip.Dispose()
+                
+                Write-Host "Extracted settings file for transformation"
+
           - task: FileTransform@1
             inputs:
-              folderPath: '$(Pipeline.Workspace)/drop'
+              folderPath: '$(Pipeline.Workspace)/temp'
               fileType: 'json'
               targetFiles: '**/local.settings.json'
+
+          - task: PowerShell@2
+            displayName: 'Update Zip with Transformed Settings'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $zipPath = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
+                $transformedSettings = Get-ChildItem -Path "$(Pipeline.Workspace)/temp" -Filter local.settings.json -Recurse | Select-Object -First 1
+                
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                $zip = [System.IO.Compression.ZipFile]::Open($zipPath, 'Update')
+                $settingsEntry = $zip.GetEntry("local.settings.json")
+                if ($settingsEntry) {
+                    $settingsEntry.Delete()
+                }
+                [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $transformedSettings.FullName, "local.settings.json")
+                $zip.Dispose()
+                
+                Write-Host "Updated zip file with transformed settings"
               
           - task: AzureAppServiceManage@0
             displayName: 'Stop Function App'
@@ -154,25 +174,52 @@ stages:
               RunAsPreJob: false
 
           - task: PowerShell@2
-            displayName: 'Extract Build Artifact'
+            displayName: 'Extract Settings for Transform'
             inputs:
               targetType: 'inline'
               script: |
-                Write-Host "Extracting build artifact"
                 $zipPath = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
                 Write-Host "Found zip file at: $zipPath"
-                if (Test-Path $zipPath) {
-                    Write-Host "Zip file exists"
-                } else {
-                    Write-Error "Zip file not found at $zipPath"
-                    exit 1
-                }
                 
+                # Create a temp directory
+                $tempDir = Join-Path "$(Pipeline.Workspace)" "temp"
+                New-Item -ItemType Directory -Path $tempDir -Force
+                
+                # Extract just the settings file
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                $zip = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+                $settingsEntry = $zip.Entries | Where-Object { $_.Name -eq "local.settings.json" }
+                if ($settingsEntry) {
+                    $settingsEntry.ExtractToFile([System.IO.Path]::Combine($tempDir, "local.settings.json"), $true)
+                }
+                $zip.Dispose()
+                
+                Write-Host "Extracted settings file for transformation"
+
           - task: FileTransform@1
             inputs:
-              folderPath: '$(Pipeline.Workspace)/drop'
+              folderPath: '$(Pipeline.Workspace)/temp'
               fileType: 'json'
               targetFiles: '**/local.settings.json'
+
+          - task: PowerShell@2
+            displayName: 'Update Zip with Transformed Settings'
+            inputs:
+              targetType: 'inline'
+              script: |
+                $zipPath = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
+                $transformedSettings = Get-ChildItem -Path "$(Pipeline.Workspace)/temp" -Filter local.settings.json -Recurse | Select-Object -First 1
+                
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                $zip = [System.IO.Compression.ZipFile]::Open($zipPath, 'Update')
+                $settingsEntry = $zip.GetEntry("local.settings.json")
+                if ($settingsEntry) {
+                    $settingsEntry.Delete()
+                }
+                [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $transformedSettings.FullName, "local.settings.json")
+                $zip.Dispose()
+                
+                Write-Host "Updated zip file with transformed settings"
               
           - task: AzureAppServiceManage@0
             displayName: 'Stop Function App'
