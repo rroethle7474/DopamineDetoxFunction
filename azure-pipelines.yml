@@ -53,24 +53,7 @@ stages:
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-        zipAfterPublish: false
-
-    - task: CopyFiles@2
-      displayName: 'Ensure Settings Included'
-      inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: '**/local.settings.json'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction'
-        OverWrite: true
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive Files'
-      inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction.zip'
-        replaceExistingArchive: true
+        zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
@@ -105,12 +88,10 @@ stages:
               targetType: 'inline'
               script: |
                 Write-Host "Extracting build artifact"
-                $zipPath = "$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip"
-                Write-Host "Looking for zip file at: $zipPath"
+                $zipPath = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
+                Write-Host "Found zip file at: $zipPath"
                 if (Test-Path $zipPath) {
-                    Expand-Archive -Path $zipPath -DestinationPath "$(Pipeline.Workspace)/drop/extracted" -Force
-                    Write-Host "Listing extracted contents:"
-                    Get-ChildItem -Path "$(Pipeline.Workspace)/drop/extracted" -Recurse | ForEach-Object { $_.FullName }
+                    Write-Host "Zip file exists"
                 } else {
                     Write-Error "Zip file not found at $zipPath"
                     exit 1
@@ -118,7 +99,7 @@ stages:
                 
           - task: FileTransform@1
             inputs:
-              folderPath: '$(Pipeline.Workspace)/drop/extracted'
+              folderPath: '$(Pipeline.Workspace)/drop'
               fileType: 'json'
               targetFiles: '**/local.settings.json'
               
@@ -135,7 +116,7 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appName: 'smd-function-test'
               appType: 'functionApp'
-              package: '$(Pipeline.Workspace)/drop/extracted'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
               appSettings: >-
@@ -178,12 +159,10 @@ stages:
               targetType: 'inline'
               script: |
                 Write-Host "Extracting build artifact"
-                $zipPath = "$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip"
-                Write-Host "Looking for zip file at: $zipPath"
+                $zipPath = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter *.zip | Select-Object -First 1 -ExpandProperty FullName
+                Write-Host "Found zip file at: $zipPath"
                 if (Test-Path $zipPath) {
-                    Expand-Archive -Path $zipPath -DestinationPath "$(Pipeline.Workspace)/drop/extracted" -Force
-                    Write-Host "Listing extracted contents:"
-                    Get-ChildItem -Path "$(Pipeline.Workspace)/drop/extracted" -Recurse | ForEach-Object { $_.FullName }
+                    Write-Host "Zip file exists"
                 } else {
                     Write-Error "Zip file not found at $zipPath"
                     exit 1
@@ -191,7 +170,7 @@ stages:
                 
           - task: FileTransform@1
             inputs:
-              folderPath: '$(Pipeline.Workspace)/drop/extracted'
+              folderPath: '$(Pipeline.Workspace)/drop'
               fileType: 'json'
               targetFiles: '**/local.settings.json'
               
@@ -208,13 +187,13 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appName: 'smd-function-prod'
               appType: 'functionApp'
-              package: '$(Pipeline.Workspace)/drop/extracted'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
-              appSettings: |
-                FUNCTIONS_WORKER_RUNTIME=dotnet-isolated
-                DOTNET_ISOLATED_RUNTIME_VERSION=8.0
-                FUNCTIONS_EXTENSION_VERSION=~4
+              appSettings: >-
+                -FUNCTIONS_WORKER_RUNTIME dotnet-isolated 
+                -DOTNET_ISOLATED_RUNTIME_VERSION 8.0 
+                -FUNCTIONS_EXTENSION_VERSION ~4
               
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
