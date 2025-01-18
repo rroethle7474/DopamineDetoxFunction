@@ -138,10 +138,10 @@ stages:
               package: '$(Pipeline.Workspace)/drop/extracted'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
-              appSettings: |
-                FUNCTIONS_WORKER_RUNTIME=dotnet-isolated
-                DOTNET_ISOLATED_RUNTIME_VERSION=8.0
-                FUNCTIONS_EXTENSION_VERSION=~4
+              appSettings: >-
+                -FUNCTIONS_WORKER_RUNTIME dotnet-isolated 
+                -DOTNET_ISOLATED_RUNTIME_VERSION 8.0 
+                -FUNCTIONS_EXTENSION_VERSION ~4
               
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
