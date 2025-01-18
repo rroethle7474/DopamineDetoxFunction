@@ -39,6 +39,24 @@ stages:
         projects: '$(solution)'
         arguments: '--configuration $(buildConfiguration)'
 
+    # Add explicit copy of local.settings.json
+    - task: CopyFiles@2
+      displayName: 'Copy local.settings.json to output'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/local.settings.json'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        flattenFolders: true
+
+    # Add explicit PowerShell task to verify files
+    - task: PowerShell@2
+      displayName: 'Verify Build Output'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Listing contents of ArtifactStagingDirectory:"
+          Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Recurse | ForEach-Object { Write-Host $_.FullName }
+
     - task: DotNetCoreCLI@2
       displayName: 'Publish'
       inputs:
@@ -107,6 +125,12 @@ stages:
                     $settingsEntry.ExtractToFile($settingsFile, $true)
                 } else {
                     Write-Host "WARNING: Could not find local.settings.json in the zip file"
+                    # Copy the separately published settings file if it exists
+                    $settingsFile = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter local.settings.json | Select-Object -First 1
+                    if ($settingsFile) {
+                        Write-Host "Found settings file in drop folder, copying to temp directory"
+                        Copy-Item -Path $settingsFile.FullName -Destination $tempDir
+                    }
                 }
                 $zip.Dispose()
                 
@@ -236,6 +260,12 @@ stages:
                     $settingsEntry.ExtractToFile($settingsFile, $true)
                 } else {
                     Write-Host "WARNING: Could not find local.settings.json in the zip file"
+                    # Copy the separately published settings file if it exists
+                    $settingsFile = Get-ChildItem -Path "$(Pipeline.Workspace)/drop" -Filter local.settings.json | Select-Object -First 1
+                    if ($settingsFile) {
+                        Write-Host "Found settings file in drop folder, copying to temp directory"
+                        Copy-Item -Path $settingsFile.FullName -Destination $tempDir
+                    }
                 }
                 $zip.Dispose()
                 
