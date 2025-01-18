@@ -48,6 +48,16 @@ stages:
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
         flattenFolders: true
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '**/DopamineDetoxFunction.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:GenerateRuntimeConfigurationFiles=true'
+        modifyOutputPath: true
+        zipAfterPublish: true
+
     # Add explicit PowerShell task to verify files
     - task: PowerShell@2
       displayName: 'Verify Build Output'
@@ -56,15 +66,6 @@ stages:
         script: |
           Write-Host "Listing contents of ArtifactStagingDirectory:"
           Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Recurse | ForEach-Object { Write-Host $_.FullName }
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish'
-      inputs:
-        command: 'publish'
-        publishWebProjects: false
-        projects: '**/DopamineDetoxFunction.csproj'
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-        zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
@@ -194,10 +195,6 @@ stages:
               package: '$(Pipeline.Workspace)/drop/*.zip'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
-              appSettings: >-
-                -FUNCTIONS_WORKER_RUNTIME dotnet-isolated 
-                -DOTNET_ISOLATED_RUNTIME_VERSION 8.0 
-                -FUNCTIONS_EXTENSION_VERSION ~4
               
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
@@ -329,10 +326,6 @@ stages:
               package: '$(Pipeline.Workspace)/drop/*.zip'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
-              appSettings: >-
-                -FUNCTIONS_WORKER_RUNTIME dotnet-isolated 
-                -DOTNET_ISOLATED_RUNTIME_VERSION 8.0 
-                -FUNCTIONS_EXTENSION_VERSION ~4
               
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
