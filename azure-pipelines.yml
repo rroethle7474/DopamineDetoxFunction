@@ -134,7 +134,7 @@ stages:
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
               appName: 'smd-function-test'
-              appType: 'functionAppLinux'
+              appType: 'functionApp'
               package: '$(Pipeline.Workspace)/drop/extracted'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
@@ -207,7 +207,7 @@ stages:
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
               appName: 'smd-function-prod'
-              appType: 'functionAppLinux'
+              appType: 'functionApp'
               package: '$(Pipeline.Workspace)/drop/extracted'
               deploymentMethod: 'auto'
               enableGoogleAnalytics: false
