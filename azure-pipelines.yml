@@ -115,6 +115,32 @@ stages:
               WebAppName: 'smd-function-test'
               SpecifySlotOrASE: false
 
+          - task: AzureAppService@1
+            displayName: 'Configure Function App Settings'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              appName: 'smd-function-test'
+              resourceGroupName: 'social-media-detox'
+              appSettings: |
+                [
+                  {
+                    "name": "FUNCTIONS_WORKER_RUNTIME",
+                    "value": "dotnet-isolated"
+                  },
+                  {
+                    "name": "DOTNET_ISOLATED_RUNTIME_VERSION",
+                    "value": "8.0"
+                  },
+                  {
+                    "name": "FUNCTIONS_EXTENSION_VERSION",
+                    "value": "~4"
+                  },
+                  {
+                    "name": "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED",
+                    "value": "1"
+                  }
+                ]
+
           - task: AzureFunctionApp@2
             displayName: 'Deploy Function App'
             inputs:
@@ -169,6 +195,32 @@ stages:
               Action: 'Stop Azure App Service'
               WebAppName: 'smd-function-prod'
               SpecifySlotOrASE: false
+
+          - task: AzureAppService@1
+            displayName: 'Configure Function App Settings'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              appName: 'smd-function-prod'
+              resourceGroupName: 'social-media-detox'
+              appSettings: |
+                [
+                  {
+                    "name": "FUNCTIONS_WORKER_RUNTIME",
+                    "value": "dotnet-isolated"
+                  },
+                  {
+                    "name": "DOTNET_ISOLATED_RUNTIME_VERSION",
+                    "value": "8.0"
+                  },
+                  {
+                    "name": "FUNCTIONS_EXTENSION_VERSION",
+                    "value": "~4"
+                  },
+                  {
+                    "name": "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED",
+                    "value": "1"
+                  }
+                ]
 
           - task: AzureFunctionApp@2
             displayName: 'Deploy Function App'
