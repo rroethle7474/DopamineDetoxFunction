@@ -115,36 +115,6 @@ stages:
               WebAppName: 'smd-function-test'
               SpecifySlotOrASE: false
 
-          - task: AzureWebApp@1
-            displayName: 'Configure Function App Settings'
-            inputs:
-              azureSubscription: 'SocialMediaDetoxConnection'
-              appType: 'functionApp'
-              appName: 'smd-function-test'
-              deployToSlotOrASE: false
-              resourceGroupName: 'social-media-detox'
-              deploymentMethod: 'none'
-              package: ''
-              appSettings: |
-                [
-                  {
-                    "name": "FUNCTIONS_WORKER_RUNTIME",
-                    "value": "dotnet-isolated"
-                  },
-                  {
-                    "name": "DOTNET_ISOLATED_RUNTIME_VERSION",
-                    "value": "8.0"
-                  },
-                  {
-                    "name": "FUNCTIONS_EXTENSION_VERSION",
-                    "value": "~4"
-                  },
-                  {
-                    "name": "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED",
-                    "value": "1"
-                  }
-                ]
-
           - task: AzureFunctionApp@2
             displayName: 'Deploy Function App'
             inputs:
