@@ -39,58 +39,52 @@ stages:
         projects: '$(solution)'
         arguments: '--configuration $(buildConfiguration)'
 
-    # Copy local.settings.json and Core14.profile.xml
-    - task: CopyFiles@2
-      displayName: 'Copy Configuration Files'
+    # Clean the publish directory
+    - task: DeleteFiles@1
+      displayName: 'Clean publish directory'
       inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: |
-          **/local.settings.json
-          **/Core14.profile.xml
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-        flattenFolders: false
+        SourceFolder: '$(Build.ArtifactStagingDirectory)'
+        Contents: '**/*'
 
-    # Modified publish task with FunctionsPreserveMetadata
+    # Publish Function App
     - task: DotNetCoreCLI@2
-      displayName: 'Publish'
+      displayName: 'Publish Function App'
       inputs:
-        command: 'publish'
+        command: publish
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish /p:GenerateRuntimeConfigurationFiles=true /p:FunctionsPreserveMetadata=true'
-        modifyOutputPath: false
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish /p:GenerateRuntimeConfigurationFiles=true'
         zipAfterPublish: false
+        modifyOutputPath: false
+
+    # Copy host.json and local.settings.json
+    - task: CopyFiles@2
+      displayName: 'Copy Function Configurations'
+      inputs:
+        SourceFolder: '$(Build.ArtifactStagingDirectory)/publish'
+        Contents: |
+          **/host.json
+          **/local.settings.json
+          **/Core14.profile.xml
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/functions'
+        flattenFolders: false
 
     # Create the deployment package
     - task: ArchiveFiles@2
-      displayName: 'Create Function Zip'
+      displayName: 'Create Function App Zip'
       inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish/DopamineDetoxFunction'
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish'
         includeRootFolder: false
         archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction.zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
         replaceExistingArchive: true
-
-    # Add explicit PowerShell task to verify files
-    - task: PowerShell@2
-      displayName: 'Verify Build Output'
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host "Listing contents of publish directory:"
-          Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)/publish" -Recurse | ForEach-Object { Write-Host $_.FullName }
-          
-          Write-Host "Listing contents of zip file:"
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $zip = [System.IO.Compression.ZipFile]::OpenRead("$(Build.ArtifactStagingDirectory)/DopamineDetoxFunction.zip")
-          $zip.Entries | ForEach-Object { Write-Host $_.FullName }
-          $zip.Dispose()
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: 'drop'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
 
 - stage: DeployToTest
   dependsOn: Build
@@ -120,16 +114,25 @@ stages:
               Action: 'Stop Azure App Service'
               WebAppName: 'smd-function-test'
               SpecifySlotOrASE: false
-              
+
           - task: AzureFunctionApp@2
+            displayName: 'Deploy Function App'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
-              appName: 'smd-function-test'
               appType: 'functionApp'
-              package: '$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip'
+              appName: 'smd-function-test'
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
               deploymentMethod: 'zipDeploy'
-              enableGoogleAnalytics: false
-              
+              resourceGroupName: 'social-media-detox'
+
+          - task: AzureAppServiceManage@0
+            displayName: 'Start Function App'
+            inputs:
+              azureSubscription: 'SocialMediaDetoxConnection'
+              Action: 'Start Azure App Service'
+              WebAppName: 'smd-function-prod'
+              SpecifySlotOrASE: false
+
           - task: AzureAppServiceManage@0
             displayName: 'Start Function App'
             inputs:
@@ -166,20 +169,13 @@ stages:
               Action: 'Stop Azure App Service'
               WebAppName: 'smd-function-prod'
               SpecifySlotOrASE: false
-              
+
           - task: AzureFunctionApp@2
+            displayName: 'Deploy Function App'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
-              appName: 'smd-function-prod'
               appType: 'functionApp'
-              package: '$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip'
+              appName: 'smd-function-prod'
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
               deploymentMethod: 'zipDeploy'
-              enableGoogleAnalytics: false
-              
-          - task: AzureAppServiceManage@0
-            displayName: 'Start Function App'
-            inputs:
-              azureSubscription: 'SocialMediaDetoxConnection'
-              Action: 'Start Azure App Service'
-              WebAppName: 'smd-function-prod'
-              SpecifySlotOrASE: false
+              resourceGroupName: 'social-media-detox'
