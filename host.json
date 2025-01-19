@@ -4,26 +4,9 @@
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
-        "excludedTypes": "Request",
-        "initialSamplingRate": 100,
-        "maximumSamplingRate": 100,
-        "samplingPercentageIncreaseTimeout": "00:00:01",
-        "includedTypes": "PageView;Trace;Dependency;Request"
+        "excludedTypes": "Request"
       },
-      "enableLiveMetricsFilters": true,
-      "enableDependencyTracking": true,
-      "enablePerformanceCountersCollection": true,
-      "httpAutoCollectionOptions": {
-        "enableHttpTriggerExtendedInfoCollection": true,
-        "enableW3CDistributedTracing": true,
-        "enableResponseHeaderInjection": true
-      }
-    },
-    "logLevel": {
-      "default": "Information",
-      "Host.Results": "Information",
-      "Function": "Information",
-      "Host.Aggregator": "Information"
+      "enableLiveMetricsFilters": true
     }
   },
   "extensions": {
@@ -35,17 +18,8 @@
         ],
         "allowedMethods": [ "GET", "POST", "OPTIONS" ],
         "allowedHeaders": [ "*" ],
-        "allowCredentials": true,
-        "maxAge": 86400
-      },
-      "maxOutstandingRequests": 200,
-      "maxConcurrentRequests": 100,
-      "dynamicThrottlesEnabled": true
+        "allowCredentials": true
+      }
     }
-  },
-  "extensionBundle": {
-    "id": "Microsoft.Azure.Functions.ExtensionBundle",
-    "version": "[3.15.0, 4.0.0)"
-  },
-  "functionTimeout": "00:10:00"
+  }
 }
