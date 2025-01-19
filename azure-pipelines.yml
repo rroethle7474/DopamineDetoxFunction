@@ -115,7 +115,7 @@ stages:
               WebAppName: 'smd-function-test'
               SpecifySlotOrASE: false
 
-          - task: AzureAppService@1
+          - task: AzureWebApp@1
             displayName: 'Configure Function App Settings'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
@@ -196,7 +196,7 @@ stages:
               WebAppName: 'smd-function-prod'
               SpecifySlotOrASE: false
 
-          - task: AzureAppService@1
+          - task: AzureWebApp@1
             displayName: 'Configure Function App Settings'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
