@@ -119,8 +119,12 @@ stages:
             displayName: 'Configure Function App Settings'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
+              appType: 'functionApp'
               appName: 'smd-function-test'
+              deployToSlotOrASE: false
               resourceGroupName: 'social-media-detox'
+              deploymentMethod: 'none'
+              package: ''
               appSettings: |
                 [
                   {
@@ -200,8 +204,12 @@ stages:
             displayName: 'Configure Function App Settings'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
+              appType: 'functionApp'
               appName: 'smd-function-prod'
+              deployToSlotOrASE: false
               resourceGroupName: 'social-media-detox'
+              deploymentMethod: 'none'
+              package: ''
               appSettings: |
                 [
                   {
