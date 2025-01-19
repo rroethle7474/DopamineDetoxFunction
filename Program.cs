@@ -3,7 +3,6 @@ using DopamineDetoxFunction.Services;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,15 +13,13 @@ var host = new HostBuilder()
         config.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true);
         config.AddEnvironmentVariables();
     })
-    .ConfigureFunctionsWorkerDefaults(workerApplication =>
-    {
-        workerApplication.UseFunctionExecutionMiddleware();
-    })
+    .ConfigureFunctionsWebApplication()
     .ConfigureServices((context, services) =>
     {
         var configuration = context.Configuration;
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
+
         services.AddMemoryCache(); // Add this line to register IMemoryCache
 
         // add YouTubeService & Wrapper with HttpClient
@@ -30,12 +27,12 @@ var host = new HostBuilder()
         var searchApiUrl = configuration["SearchApiUrl"] ?? "http://127.0.0.1:5000";
         var oEmbedApiUrl = configuration["XOEmbedApiUrl"] ?? "https://publish.twitter.com/oembed?url=";
 
+
         services.AddHttpClient<ITwitterEmbedService, TwitterEmbedService>(client =>
         {
             client.BaseAddress = new Uri(oEmbedApiUrl);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
-
         // python web scraper to get twitter results
         services.AddHttpClient<ITwitterService, TwitterService>(client =>
         {
@@ -43,8 +40,8 @@ var host = new HostBuilder()
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.Timeout = TimeSpan.FromMinutes(5);
         });
-
         services.AddHttpClient();
+
         services.AddTransient(provider =>
         {
             return new YouTubeService(new BaseClientService.Initializer()
@@ -55,7 +52,6 @@ var host = new HostBuilder()
         });
 
         services.AddTransient<IYouTubeWrapperService, YouTubeWrapperService>();
-
         var azureSignalRConnectionString = configuration["AzureSignalRConnectionString"];
         services.AddSignalR().AddAzureSignalR(azureSignalRConnectionString);
         services.AddTransient<ISignalRService, SignalRService>();
@@ -75,6 +71,8 @@ var host = new HostBuilder()
         });
 
         services.AddTransient<IDopamineDetoxApiService, DopamineDetoxApiService>();
+
+
     })
     .Build();
 
