@@ -115,22 +115,6 @@ stages:
               WebAppName: 'smd-function-test'
               SpecifySlotOrASE: false
 
-          - task: AzureAppServiceSettings@1
-            displayName: 'Configure Function App Settings'
-            inputs:
-              azureSubscription: 'SocialMediaDetoxConnection'
-              appName: 'smd-function-test'
-              resourceGroupName: 'social-media-detox'
-              appSettings: |
-                {
-                  "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-                  "DOTNET_ISOLATED_RUNTIME_VERSION": "8.0",
-                  "FUNCTIONS_EXTENSION_VERSION": "~4",
-                  "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED": "1",
-                  "WEBSITE_RUN_FROM_PACKAGE": "1",
-                  "DO_IT": "DO I WORK"
-                }
-
           - task: AzureFunctionApp@2
             displayName: 'Deploy Function App'
             inputs:
@@ -141,13 +125,34 @@ stages:
               deploymentMethod: 'zipDeploy'
               resourceGroupName: 'social-media-detox'
 
-          - task: AzureAppServiceManage@0
-            displayName: 'Start Function App'
+          - task: AzureCLI@2
+            displayName: 'Start Function App and Configure Settings'
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
-              Action: 'Start Azure App Service'
-              WebAppName: 'smd-function-test'
-              SpecifySlotOrASE: false
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Configure app settings
+                az functionapp config appsettings set --name 'smd-function-test' --resource-group 'social-media-detox' --settings `
+                  "FUNCTIONS_WORKER_RUNTIME=dotnet-isolated" `
+                  "DOTNET_ISOLATED_RUNTIME_VERSION=8.0" `
+                  "FUNCTIONS_EXTENSION_VERSION=~4" `
+                  "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED=1" `
+                  "WEBSITE_RUN_FROM_PACKAGE=1" `
+                  "DopamineDetox:BaseUrl=$(DopamineDetox:BaseUrl)" `
+                  "DopamineDetox:TimeoutSeconds=30" `
+                  "DopamineDetox:MaxRetryAttempts=3" `
+                  "DopamineDetox:RetryDelayMilliseconds=1000" `
+                  "SearchApiUrl=$(SearchApiUrl)" `
+                  "YouTubeApiKey=$(SMD--YouTubeApiKey)" `
+                  "AzureSignalRConnectionString=$(SMD--AzureSignalRConnectionString)" `
+                  "XOEmbedApiUrl=https://publish.twitter.com/oembed?url=" `
+                  "XLoginUrl=https://x.com/i/flow/login" `
+                  "YouTubeBaseUrl=https://www.googleapis.com/youtube/v3/" `
+                  "ConnectionStrings__DefaultConnection"="$(ProjectDb--SQL-DefaultConnectionString)"
+
+                # Start the function app
+                az functionapp start --name 'smd-function-test' --resource-group 'social-media-detox'
 
 - stage: DeployToProduction
   dependsOn: DeployToTest
@@ -178,20 +183,6 @@ stages:
               WebAppName: 'smd-function-prod'
               SpecifySlotOrASE: false
 
-          - task: AzureAppServiceSettings@1
-            displayName: 'Configure Function App Settings'
-            inputs:
-              azureSubscription: 'SocialMediaDetoxConnection'
-              appName: 'smd-function-prod'
-              resourceGroupName: 'social-media-detox'
-              appSettings: |
-                {
-                  "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-                  "DOTNET_ISOLATED_RUNTIME_VERSION": "8.0",
-                  "FUNCTIONS_EXTENSION_VERSION": "~4",
-                  "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED": "1",
-                  "WEBSITE_RUN_FROM_PACKAGE": "1"
-                }
 
           - task: AzureFunctionApp@2
             displayName: 'Deploy Function App'
