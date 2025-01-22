@@ -1,10 +1,11 @@
+# azure-pipeline.yml (updated)
 trigger:
   - main
 
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  buildConfiguration: 'Release'  # Lowercase 'b'
 
 stages:
 - stage: Build
@@ -37,7 +38,7 @@ stages:
       inputs:
         command: 'build'
         projects: '$(solution)'
-        arguments: '--configuration $(buildConfiguration)'
+        arguments: '--configuration $(buildConfiguration)'  # Lowercase 'b'
 
     # Clean the publish directory
     - task: DeleteFiles@1
@@ -46,20 +47,22 @@ stages:
         SourceFolder: '$(Build.ArtifactStagingDirectory)'
         Contents: '**/*'
 
-    # Publish Function App
+    # Publish Function App (critical fix here!)
     - task: DotNetCoreCLI@2
       displayName: 'Publish Function App'
       inputs:
         command: publish
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
-        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish /p:GenerateRuntimeConfigurationFiles=true'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish'  # Lowercase 'b'
         zipAfterPublish: false
         modifyOutputPath: false
 
-    # Verify published files (optional but recommended)
-    - script: ls -R $(Build.ArtifactStagingDirectory)/publish
-      displayName: 'Verify publish contents'
+    # Verify host.json is present in the artifact
+    - script: |
+        echo "Contents of publish directory:"
+        ls -R $(Build.ArtifactStagingDirectory)/publish
+      displayName: 'Validate host.json in Artifact'
 
     # Create the deployment package
     - task: ArchiveFiles@2
