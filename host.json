@@ -13,9 +13,7 @@
     "http": {
       "routePrefix": "api",
       "cors": {
-        "allowedOrigins": [
-          "http://localhost:4200"
-        ],
+        "allowedOrigins": [ "*" ],
         "allowedMethods": [ "GET", "POST", "OPTIONS" ],
         "allowedHeaders": [ "*" ],
         "allowCredentials": true
