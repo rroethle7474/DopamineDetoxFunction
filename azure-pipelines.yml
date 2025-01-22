@@ -57,17 +57,9 @@ stages:
         zipAfterPublish: false
         modifyOutputPath: false
 
-    # Copy host.json and local.settings.json
-    - task: CopyFiles@2
-      displayName: 'Copy Function Configurations'
-      inputs:
-        SourceFolder: '$(Build.ArtifactStagingDirectory)/publish'
-        Contents: |
-          **/host.json
-          **/local.settings.json
-          **/Core14.profile.xml
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/functions'
-        flattenFolders: false
+    # Verify published files (optional but recommended)
+    - script: ls -R $(Build.ArtifactStagingDirectory)/publish
+      displayName: 'Verify publish contents'
 
     # Create the deployment package
     - task: ArchiveFiles@2
@@ -182,7 +174,6 @@ stages:
               Action: 'Stop Azure App Service'
               WebAppName: 'smd-function-prod'
               SpecifySlotOrASE: false
-
 
           - task: AzureFunctionApp@2
             displayName: 'Deploy Function App'
