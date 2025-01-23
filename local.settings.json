@@ -12,7 +12,8 @@
     "XLoginUrl": "https://x.com/i/flow/login",
     "DopamineDetox:TimeoutSeconds": "30",
     "DopamineDetox:MaxRetryAttempts": "3",
-    "DopamineDetox:RetryDelayMilliseconds": "1000"
+    "DopamineDetox:RetryDelayMilliseconds": "1000",
+    "UselessSetting":  true
   },
   "ConnectionStrings": {
     "DefaultConnection": "#{DefaultConnection}#"
