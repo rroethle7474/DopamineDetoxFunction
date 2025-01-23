@@ -81,6 +81,9 @@ stages:
           steps:
           - download: current
             artifact: drop
+
+          - script: ls -R $(Pipeline.Workspace)/drop
+            displayName: 'List Artifact Contents'            
           - task: AzureKeyVault@2
             inputs:
               azureSubscription: 'SMD-KeyVault'
