@@ -56,9 +56,8 @@ stages:
         projects: '**/DopamineDetoxFunction.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
         zipAfterPublish: true
-        modifiesOutputPath: true  # Ensures the ZIP is generated
+        modifyOutputPath: true  # Ensures the ZIP is generated
         zipFileName: '$(Build.BuildId).zip'  # Explicitly name the ZIP
-        modifyOutputPath: false 
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
