@@ -145,6 +145,7 @@ stages:
       vmImage: 'ubuntu-latest'
     strategy:
       runOnce:
+        deploy:
           steps:
           - download: current
             artifact: drop
