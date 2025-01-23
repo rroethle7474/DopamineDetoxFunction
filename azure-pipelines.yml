@@ -86,8 +86,8 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                  az functionapp deployment list --name smd-function-test --resource-group social-media-detox --output table
-                  az functionapp deployment source config-zip delete --name smd-function-test --resource-group social-media-detox
+                az functionapp deploy list-publishing-credentials --name smd-function-test --resource-group social-media-detox
+                az functionapp deploy list --name smd-function-test --resource-group social-media-detox
 
           - task: AzureKeyVault@2
             inputs:
@@ -164,8 +164,8 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                  az functionapp deployment list --name smd-function-prod --resource-group social-media-detox --output table
-                  az functionapp deployment source config-zip delete --name smd-function-prod --resource-group social-media-detox
+                az functionapp deploy list-publishing-credentials --name smd-function-prod --resource-group social-media-detox
+                az functionapp deploy list --name smd-function-prod --resource-group social-media-detox
 
           - task: AzureKeyVault@2
             inputs:
