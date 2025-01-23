@@ -87,7 +87,8 @@ stages:
               buildType: 'current'
               downloadType: 'single'
               artifactName: 'drop'
-              downloadPath: '$(Pipeline.Workspace)'
+              itemPattern: '**/*.zip'
+              downloadPath: '$(System.ArtifactsDirectory)'
 
           - script: ls -R $(Pipeline.Workspace)/drop
             displayName: 'List Artifact Contents'            
