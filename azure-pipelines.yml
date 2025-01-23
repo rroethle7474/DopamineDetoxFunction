@@ -57,7 +57,7 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
         zipAfterPublish: true
         modifyOutputPath: true  # Ensures the ZIP is generated
-        zipFileName: 'functionapp.zip'  # Explicitly name the ZIP
+        zipFileName: "$(Build.BuildId).zip"  # Explicitly name the ZIP
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
@@ -82,8 +82,12 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: drop
+          - task: DownloadBuildArtifacts@1  # Add this step
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'drop'
+              downloadPath: '$(Pipeline.Workspace)'
 
           - script: ls -R $(Pipeline.Workspace)/drop
             displayName: 'List Artifact Contents'            
@@ -108,7 +112,7 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appType: 'functionApp'
               appName: 'smd-function-test'
-              package: '$(Pipeline.Workspace)/drop/functionapp.zip'
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
               deploymentMethod: 'zipDeploy'
               resourceGroupName: 'social-media-detox'
 
