@@ -58,12 +58,16 @@ stages:
         zipAfterPublish: true
         modifiesOutputPath: true  # Ensures the ZIP is generated
         zipFileName: '$(Build.BuildId).zip'  # Explicitly name the ZIP
+        modifyOutputPath: false 
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts'
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
+
+    - script: ls -R $(Build.ArtifactStagingDirectory)
+    displayName: 'Verify Build Artifact Contents'
 
 - stage: DeployToTest
   dependsOn: Build
