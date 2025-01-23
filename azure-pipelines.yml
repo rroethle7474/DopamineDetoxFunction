@@ -99,7 +99,7 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appType: 'functionApp'
               appName: 'smd-function-test'
-              package: '$(Pipeline.Workspace)/drop/DopamineDetoxFunction.zip'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
               deploymentMethod: 'zipDeploy'
               resourceGroupName: 'social-media-detox'
 
