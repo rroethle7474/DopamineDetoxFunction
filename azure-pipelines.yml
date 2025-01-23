@@ -84,6 +84,7 @@ stages:
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
               scriptType: 'bash'
+              scriptLocation: 'inlineScript'
               inlineScript: |
                   az functionapp deployment list --name smd-function-test --resource-group social-media-detox --output table
                   az functionapp deployment source config-zip delete --name smd-function-test --resource-group social-media-detox
@@ -161,6 +162,7 @@ stages:
             inputs:
               azureSubscription: 'SocialMediaDetoxConnection'
               scriptType: 'bash'
+              scriptLocation: 'inlineScript'
               inlineScript: |
                   az functionapp deployment list --name smd-function-prod --resource-group social-media-detox --output table
                   az functionapp deployment source config-zip delete --name smd-function-prod --resource-group social-media-detox
