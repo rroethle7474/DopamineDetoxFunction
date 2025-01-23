@@ -58,14 +58,14 @@ stages:
         zipAfterPublish: false
         modifyOutputPath: false
 
-    # NEW: Force copy host.json from source to publish directory
     - task: CopyFiles@2
       displayName: 'Overwrite host.json'
       inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/DopamineDetoxFunction'  # Path to your host.json
-        Contents: 'host.json'
+        SourceFolder: '$(Build.SourcesDirectory)'  # Root of repository
+        Contents: '**/host.json'                   # Search recursively
         TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
         OverWrite: true
+        flattenFolders: true
 
     # Verify host.json
     - script: cat $(Build.ArtifactStagingDirectory)/publish/host.json
