@@ -47,16 +47,29 @@ stages:
         SourceFolder: '$(Build.ArtifactStagingDirectory)'
         Contents: '**/*'
 
-    # Publish Function App (critical fix here!)
+    # Publish Function App
     - task: DotNetCoreCLI@2
       displayName: 'Publish Function App'
       inputs:
         command: publish
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish'  # Lowercase 'b'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish'
         zipAfterPublish: false
         modifyOutputPath: false
+
+    # NEW: Force copy host.json from source to publish directory
+    - task: CopyFiles@2
+      displayName: 'Overwrite host.json'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/YourFunctionProjectDirectory'  # Path to your host.json
+        Contents: 'host.json'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
+        OverWrite: true
+
+    # Verify host.json
+    - script: cat $(Build.ArtifactStagingDirectory)/publish/host.json
+      displayName: 'Confirm host.json contents'
 
     # Verify host.json is present in the artifact
     - script: |
