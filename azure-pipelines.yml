@@ -54,8 +54,7 @@ stages:
         command: 'publish'
         publishWebProjects: false
         projects: '**/DopamineDetoxFunction.csproj'
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:GenerateRuntimeConfigurationFiles=true'
-        modifyOutputPath: true
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
         zipAfterPublish: true
 
     - task: PublishBuildArtifacts@1
@@ -80,6 +79,15 @@ stages:
           steps:
           - download: current
             artifact: drop
+        - task: AzureCLI@2
+            displayName: 'Clean existing deployment'
+            inputs:
+            azureSubscription: 'SocialMediaDetoxConnection'
+            scriptType: 'bash'
+            inlineScript: |
+                az functionapp deployment list --name smd-function-test --resource-group social-media-detox --output table
+                az functionapp deployment source config-zip delete --name smd-function-test --resource-group social-media-detox
+
           - task: AzureKeyVault@2
             inputs:
               azureSubscription: 'SMD-KeyVault'
@@ -148,6 +156,15 @@ stages:
       runOnce:
         deploy:
           steps:
+        - task: AzureCLI@2
+            displayName: 'Clean existing deployment'
+            inputs:
+            azureSubscription: 'SocialMediaDetoxConnection'
+            scriptType: 'bash'
+            inlineScript: |
+                az functionapp deployment list --name smd-function-prod --resource-group social-media-detox --output table
+                az functionapp deployment source config-zip delete --name smd-function-prod --resource-group social-media-detox
+
           - task: AzureKeyVault@2
             inputs:
               azureSubscription: 'SMD-KeyVault'
