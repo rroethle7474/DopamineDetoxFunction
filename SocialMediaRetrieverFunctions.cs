@@ -276,139 +276,139 @@ namespace DopamineDetoxFunction
             return new SignalRMessageAction("dataUpdated", new[] { message });
         }
 
-            #region TimerTriggers
+        #region TimerTriggers
 
 
 
-            //[Function("SocialMediaDataTimerRun")]
-            //public async Task<SignalRMessageAction> Run(
-            //    [TimerTrigger("0 8,20 * * *")] TimerInfo myTimer)
-            //{
-            //    _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+        [Function("SocialMediaDataTimerRun")]
+        public async Task<SignalRMessageAction> Run(
+            [TimerTrigger("0 17 * * *")] TimerInfo myTimer)
+        {
+            _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            //    var response = new SocialMediaTimerDataResponse
-            //    {
-            //        Message = "Execution completed",
-            //        ExecutionTime = DateTime.Now,
-            //        NextExecutionTime = myTimer.ScheduleStatus?.Next
-            //    };
+            var response = new SocialMediaTimerDataResponse
+            {
+                Message = "Execution completed",
+                ExecutionTime = DateTime.Now,
+                NextExecutionTime = myTimer.ScheduleStatus?.Next
+            };
 
-            //    await ResetCache("true");
+            await ResetCache("true");
 
-            //    try
-            //    {
-            //        response.DefaultYouTubeResponse = await RetrieveYouTubeDefaultData();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.LogError(ex, "Error retrieving YouTube default data");
-            //        response.Errors.Add($"Error retrieving YouTube default data: {ex.Message}");
-            //    }
+            try
+            {
+                response.DefaultYouTubeResponse = await RetrieveYouTubeDefaultData();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving YouTube default data");
+                response.Errors.Add($"Error retrieving YouTube default data: {ex.Message}");
+            }
 
-            //    try
-            //    {
-            //        response.DefaultXResponse = await RetrieveXDefaultData();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.LogError(ex, "Error retrieving X default data");
-            //        response.Errors.Add($"Error retrieving X default data: {ex.Message}");
-            //    }
+            try
+            {
+                response.DefaultXResponse = await RetrieveXDefaultData();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving X default data");
+                response.Errors.Add($"Error retrieving X default data: {ex.Message}");
+            }
 
-            //    try
-            //    {
-            //        response.YouTubeResponse = await RetrieveYouTubeData();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.LogError(ex, "Error retrieving YouTube data");
-            //        response.Errors.Add($"Error retrieving YouTube data: {ex.Message}");
-            //    }
+            try
+            {
+                response.YouTubeResponse = await RetrieveYouTubeData();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving YouTube data");
+                response.Errors.Add($"Error retrieving YouTube data: {ex.Message}");
+            }
 
-            //    try
-            //    {
-            //        response.XResponse = await RetrieveXData();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.LogError(ex, "Error retrieving X data");
-            //        response.Errors.Add($"Error retrieving X data: {ex.Message}");
-            //    }
+            try
+            {
+                response.XResponse = await RetrieveXData();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving X data");
+                response.Errors.Add($"Error retrieving X data: {ex.Message}");
+            }
 
-            //    try
-            //    {
-            //        response.YouTubeChannelResponse = await RetrieveYouTubeChannelData();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.LogError(ex, "Error retrieving YouTube channel data");
-            //        response.Errors.Add($"Error retrieving YouTube channel data: {ex.Message}");
-            //    }
+            try
+            {
+                response.YouTubeChannelResponse = await RetrieveYouTubeChannelData();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving YouTube channel data");
+                response.Errors.Add($"Error retrieving YouTube channel data: {ex.Message}");
+            }
 
-            //    try
-            //    {
-            //        response.XChannelResponse = await RetrieveXChannelData();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _logger.LogError(ex, "Error retrieving X channel data");
-            //        response.Errors.Add($"Error retrieving X channel data: {ex.Message}");
-            //    }
+            try
+            {
+                response.XChannelResponse = await RetrieveXChannelData();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving X channel data");
+                response.Errors.Add($"Error retrieving X channel data: {ex.Message}");
+            }
 
-            //    var message = new
-            //    {
-            //        updateTime = response.ExecutionTime,
-            //        nextUpdateTime = response.NextExecutionTime,
-            //        hasErrors = response.Errors.Any(),
-            //        summary = new
-            //        {
-            //            defaultYouTube = new
-            //            {
-            //                success = response.DefaultYouTubeResponse.SuccessResults,
-            //                errors = response.DefaultYouTubeResponse.Errors.Count,
-            //                message = response.DefaultYouTubeResponse.ReportMessage
-            //            },
-            //            defaultX = new
-            //            {
-            //                success = response.DefaultXResponse.SuccessResults,
-            //                errors = response.DefaultXResponse.Errors.Count,
-            //                message = response.DefaultXResponse.ReportMessage
-            //            },
-            //            youtube = new
-            //            {
-            //                success = response.YouTubeResponse.SuccessResults,
-            //                errors = response.YouTubeResponse.Errors.Count,
-            //                message = response.YouTubeResponse.ReportMessage
-            //            },
-            //            x = new
-            //            {
-            //                success = response.XResponse.SuccessResults,
-            //                errors = response.XResponse.Errors.Count,
-            //                message = response.XResponse.ReportMessage
-            //            },
-            //            youtubeChannel = new
-            //            {
-            //                success = response.YouTubeChannelResponse.SuccessResults,
-            //                errors = response.YouTubeChannelResponse.Errors.Count,
-            //                message = response.YouTubeChannelResponse.ReportMessage
-            //            },
-            //            xChannel = new
-            //            {
-            //                success = response.XChannelResponse.SuccessResults,
-            //                errors = response.XChannelResponse.Errors.Count,
-            //                message = response.XChannelResponse.ReportMessage
-            //            }
-            //        }
-            //    };
+            var message = new
+            {
+                updateTime = response.ExecutionTime,
+                nextUpdateTime = response.NextExecutionTime,
+                hasErrors = response.Errors.Any(),
+                summary = new
+                {
+                    defaultYouTube = new
+                    {
+                        success = response.DefaultYouTubeResponse.SuccessResults,
+                        errors = response.DefaultYouTubeResponse.Errors.Count,
+                        message = response.DefaultYouTubeResponse.ReportMessage
+                    },
+                    defaultX = new
+                    {
+                        success = response.DefaultXResponse.SuccessResults,
+                        errors = response.DefaultXResponse.Errors.Count,
+                        message = response.DefaultXResponse.ReportMessage
+                    },
+                    youtube = new
+                    {
+                        success = response.YouTubeResponse.SuccessResults,
+                        errors = response.YouTubeResponse.Errors.Count,
+                        message = response.YouTubeResponse.ReportMessage
+                    },
+                    x = new
+                    {
+                        success = response.XResponse.SuccessResults,
+                        errors = response.XResponse.Errors.Count,
+                        message = response.XResponse.ReportMessage
+                    },
+                    youtubeChannel = new
+                    {
+                        success = response.YouTubeChannelResponse.SuccessResults,
+                        errors = response.YouTubeChannelResponse.Errors.Count,
+                        message = response.YouTubeChannelResponse.ReportMessage
+                    },
+                    xChannel = new
+                    {
+                        success = response.XChannelResponse.SuccessResults,
+                        errors = response.XChannelResponse.Errors.Count,
+                        message = response.XChannelResponse.ReportMessage
+                    }
+                }
+            };
 
-            //    // Return the SignalR message directly
-            //    return new SignalRMessageAction("dataUpdated", new[] { message });
-            //}
+            // Return the SignalR message directly
+            return new SignalRMessageAction("dataUpdated", new[] { message });
+        }
 
-            #endregion
+        #endregion
 
-            #region FunctionLogicMethods
-            private async Task<SocialMediaDataResponse> RetrieveYouTubeData(string? isNew = "false")
+        #region FunctionLogicMethods
+        private async Task<SocialMediaDataResponse> RetrieveYouTubeData(string? isNew = "false")
         {
             var socialMediaDataResponse = new SocialMediaDataResponse();
             bool hasYouTubeReport = await _dopamineDetoxApiService.HasTodayYouTubeReport(isDefaultReport: false, isChannelReport: false);
