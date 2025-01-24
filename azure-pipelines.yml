@@ -130,7 +130,7 @@ stages:
                   "DOTNET_ISOLATED_RUNTIME_VERSION=8.0" \
                   "FUNCTIONS_EXTENSION_VERSION=~4" \
                   "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED=1" \
-                  "WEBSITE_RUN_FROM_PACKAGE=1" \
+                  "WEBSITE_RUN_FROM_PACKAGE=0" \
                   "DopamineDetox:BaseUrl=$(DopamineDetox:BaseUrl)" \
                   "DopamineDetox:TimeoutSeconds=30" \
                   "DopamineDetox:MaxRetryAttempts=3" \
