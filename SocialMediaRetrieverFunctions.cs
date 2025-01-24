@@ -125,6 +125,15 @@ namespace DopamineDetoxFunction
             return new OkObjectResult(socialMediaDataResponse);
         }
 
+        [Function("TheBestEverGetXSocialMediaData")]
+        public async Task<IActionResult> TheBestEverGetXSocialMediaData(
+[HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
+        {
+            _logger.LogInformation("C# HTTP trigger function processed a request. GetXSocialMediaData");
+            var socialMediaDataResponse = await RetrieveXData(req.Query["isNew"]);
+            return new OkObjectResult(socialMediaDataResponse);
+        }
+
         [Function("GetXSocialMediaChannelData")]
         public async Task<IActionResult> GetXSocialMediaChannelData(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)

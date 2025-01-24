@@ -160,8 +160,16 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: drop
+          - task: DownloadBuildArtifacts@1  # Add this step
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'drop'
+              itemPattern: '**/*.zip'
+              downloadPath: '$(System.ArtifactStagingDirectory)'
+
+          - script: ls -R $(Pipeline.Workspace)/drop
+            displayName: 'List Artifact Contents'   
           - task: AzureKeyVault@2
             inputs:
               azureSubscription: 'SMD-KeyVault'
@@ -183,7 +191,7 @@ stages:
               azureSubscription: 'SocialMediaDetoxConnection'
               appType: 'functionApp'
               appName: 'smd-function-prod'
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
               deploymentMethod: 'zipDeploy'
               resourceGroupName: 'social-media-detox'
 
@@ -200,7 +208,7 @@ stages:
                   "DOTNET_ISOLATED_RUNTIME_VERSION=8.0" \
                   "FUNCTIONS_EXTENSION_VERSION=~4" \
                   "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED=1" \
-                  "WEBSITE_RUN_FROM_PACKAGE=1" \
+                  "WEBSITE_RUN_FROM_PACKAGE=0" \
                   "DopamineDetox:BaseUrl=$(DopamineDetox:BaseUrl)" \
                   "DopamineDetox:TimeoutSeconds=30" \
                   "DopamineDetox:MaxRetryAttempts=3" \
