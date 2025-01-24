@@ -13,7 +13,9 @@
     "DopamineDetox:TimeoutSeconds": "30",
     "DopamineDetox:MaxRetryAttempts": "3",
     "DopamineDetox:RetryDelayMilliseconds": "1000",
-    "UselessSetting":  true
+    "TimerSchedule": "0 17 * * *",
+    "DailyQuoteTimerSchedule": "0 30 17 * * *",
+    "WeeklyCleanupTimerSchedule": "0 30 13 * * 6" // 1:30 P.M. every Saturday
   },
   "ConnectionStrings": {
     "DefaultConnection": "#{DefaultConnection}#"

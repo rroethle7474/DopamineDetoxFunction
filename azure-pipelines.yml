@@ -142,6 +142,9 @@ stages:
                   "XLoginUrl=https://x.com/i/flow/login" \
                   "YouTubeBaseUrl=https://www.googleapis.com/youtube/v3/" \
                   "ConnectionStrings__DefaultConnection"="$(ProjectDb--SQL-DefaultConnectionString)" \
+                  "TimerSchedule=0 17 * * *" \
+                  "DailyQuoteTimerSchedule=0 30 17 * * *" \
+                  "WeeklyCleanupTimerSchedule=0 30 13 * * 6"
 
                 # Start the function app
                 az functionapp start --name 'smd-function-test' --resource-group 'social-media-detox'
@@ -220,6 +223,9 @@ stages:
                   "XLoginUrl=https://x.com/i/flow/login" \
                   "YouTubeBaseUrl=https://www.googleapis.com/youtube/v3/" \
                   "ConnectionStrings__DefaultConnection"="$(ProjectDb--SQL-DefaultConnectionString)" \
+                  "TimerSchedule=0 24 * * *" \
+                  "DailyQuoteTimerSchedule=0 30 18 * * *" \
+                  "WeeklyCleanupTimerSchedule=0 30 15 * * 6"
 
                 # Start the function app
                 az functionapp start --name 'smd-function-prod' --resource-group 'social-media-detox'

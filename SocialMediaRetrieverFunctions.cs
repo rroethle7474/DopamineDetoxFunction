@@ -277,12 +277,41 @@ namespace DopamineDetoxFunction
         }
 
         #region TimerTriggers
+        [Function("WeeklyCleanupSocialMediaDataTimerTrigger")]
+        public async Task<IActionResult> WeeklyCleanupSocialMediaDataTimerTriggerRun(
+    [TimerTrigger("%WeeklyCleanupTimerSchedule%")] TimerInfo myTimer)
+        {
+            _logger.LogInformation("C# Timer trigger function executed at: WeeklyCleanupSocialMediaDataTimerTrigger");
+            try
+            {
+                var socialMediaDataResponse = await CleanupSocialMediaData();
+                return new OkObjectResult(socialMediaDataResponse);
+            }
+            catch (Exception e)
+            {
+                return new OkObjectResult(e.Message);
+            }
+        }
 
+        [Function("AddDailyQuoteTimerTrigger")]
+        [SignalROutput(HubName = "socialmedia")]
+        public async Task<SignalRMessageAction> AddDailyQuoteTimerTriggerRun([TimerTrigger("%DailyQuoteTimerSchedule%")] TimerInfo myTimer)
+        {
+            _logger.LogInformation("C# Timer trigger function executed at for AddDailyQuoteTimer");
+            var isCreated = await AddDailySocialMediaQuote();
+            var message = new
+            {
+                updateTime = DateTime.UtcNow,
+                nextUpdateTime = DateTime.UtcNow.AddDays(1),
+                hasErrors = isCreated,
+            };
+            return new SignalRMessageAction("dataUpdated", new[] { message });
+        }
 
 
         [Function("SocialMediaDataTimerRun")]
-        public async Task<SignalRMessageAction> Run(
-            [TimerTrigger("0 17 * * *")] TimerInfo myTimer)
+        public async Task<SignalRMessageAction> SocialMediaTimerRun(
+            [TimerTrigger("%TimerSchedule%")] TimerInfo myTimer)
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
 
