@@ -5,6 +5,7 @@
 test.settings.json
 prod.settings.json
 !template.settings.json
+local.development.settings.json
 
 # User-specific files
 *.suo
