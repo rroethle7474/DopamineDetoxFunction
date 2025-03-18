@@ -20,8 +20,8 @@ To run locally, create a local.settings.json file from the template.settings.jso
 
 This project depends on custom NuGet packages hosted in an Azure DevOps Artifacts feed:
 
-- **DopamineDetox.Domain** (Version 0.0.2) - Domain models and shared data structures
-- **DopamineDetox.ServiceAgent** (Version 0.0.2) - Service agent components
+- **DopamineDetox.Domain** (Version 0.0.2) - Domain models and shared data structures (https://github.com/rroethle7474/DopamineDetox.Domain)
+- **DopamineDetox.ServiceAgent** (Version 0.0.2) - Service agent components (https://github.com/rroethle7474/DopamineDetox.ServiceAgent)
 
 ### Setting Up the NuGet Feed
 
