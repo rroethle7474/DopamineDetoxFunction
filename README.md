@@ -15,6 +15,37 @@ To run locally, create a local.settings.json file from the template.settings.jso
 
 -ConnectionString: ConnectionString used for SQL database from the dbo tables found here (https://github.com/rroethle7474/ProjectDb/tree/main/dbo/Tables)
 
+
+## NuGet Configuration
+
+This project depends on custom NuGet packages hosted in an Azure DevOps Artifacts feed:
+
+- **DopamineDetox.Domain** (Version 0.0.2) - Domain models and shared data structures
+- **DopamineDetox.ServiceAgent** (Version 0.0.2) - Service agent components
+
+### Setting Up the NuGet Feed
+
+To restore these packages, you need to configure your NuGet client to use the Azure DevOps feed:
+
+1. Ensure the project includes the `nuget.config` file with the required source: (replace value with where the local nuget packages are if setting up another nuget source feed)
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <packageSources>
+        <clear />
+        <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+        <add key="Azure DevOps Packages" value="" />
+    </packageSources>
+</configuration>
+```
+
+These custom packages provide core functionality for the application:
+
+- **DopamineDetox.Domain**: Contains shared models, DTOs, and domain entities used across the solution.
+- **DopamineDetox.ServiceAgent**: Contains client libraries and service agents for external integrations.
+
+
 ## HTTP Trigger Functions
 
 The application includes several HTTP trigger functions that handle real-time communication with clients:
