@@ -15,7 +15,7 @@
     "XLoginUrl": "https://x.com/i/flow/login",
     "TimerSchedule": "0 17 * * *",
     "DailyQuoteTimerSchedule": "0 30 17 * * *",
-    "WeeklyCleanupTimerSchedule": "0 30 13 * * 6" // 1:30 P.M. every Saturday
+    "WeeklyCleanupTimerSchedule": "0 30 13 * * 6" 
   },
   "ConnectionStrings": {
     "DefaultConnection": ""
