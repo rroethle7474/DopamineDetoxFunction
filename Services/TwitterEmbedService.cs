@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 
 namespace DopamineDetoxFunction.Services
@@ -21,29 +21,45 @@ namespace DopamineDetoxFunction.Services
             
             try
             {
-                string baseUrl = _httpClient?.BaseAddress?.ToString();
                 string encodedUrl = System.Net.WebUtility.UrlEncode(url);
-                string requestUrl = $"{baseUrl}{encodedUrl}?format=json&omit_script=true&lang=en";
+                // Properly format the URL with the 'url' parameter followed by other parameters
+                string requestUrl = $"{_httpClient.BaseAddress}?url={encodedUrl}&format=json&omit_script=true&lang=en";
+                
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                
                 var response = await _httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                
+                // Log the status code and response content for debugging
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"HTTP error {(int)response.StatusCode} ({response.StatusCode}). Response: {errorContent}");
+                }
+                
                 var jsonResponse = await response.Content.ReadAsStringAsync();
 
-                var jObject = JObject.Parse(jsonResponse);
-
-                // Extract the 'html' property and decode it
-                var html = jObject["html"]?.ToString();
-                html = System.Net.WebUtility.HtmlDecode(html);
-                if(String.IsNullOrEmpty(html))
+                try
                 {
-                    throw new Exception("No HTML found in the Twitter embed response");
+                    var jObject = JObject.Parse(jsonResponse);
+
+                    // Extract the 'html' property and decode it
+                    var html = jObject["html"]?.ToString();
+                    html = System.Net.WebUtility.HtmlDecode(html);
+                    if(String.IsNullOrEmpty(html))
+                    {
+                        throw new Exception($"No HTML found in the Twitter embed response. Full response: {jsonResponse}");
+                    }
+                    return html;
                 }
-                return html;
+                catch (Exception jsonEx)
+                {
+                    throw new Exception($"Error parsing JSON response: {jsonEx.Message}. Raw response: {jsonResponse}", jsonEx);
+                }
             }
             catch(Exception ex)
             {
-                throw new Exception($"Error getting Twitter embed: {ex.Message}");
+                throw new Exception($"Error getting Twitter embed for URL '{url}': {ex.Message}", ex);
             }
         }
     }

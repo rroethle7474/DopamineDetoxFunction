@@ -1,4 +1,4 @@
-﻿using DopamineDetox.Domain.Dtos;
+using DopamineDetox.Domain.Dtos;
 using DopamineDetox.ServiceAgent.Models.Responses;
 using DopamineDetoxFunction.Extensions;
 using DopamineDetoxFunction.Models;
@@ -145,7 +145,7 @@ namespace DopamineDetoxFunction.Services
                         }
                         catch(Exception e)
                         {
-                            socialMediaDataResponse.Errors.Add($"Error getting embed html '{t.EmbedUrl}': {e.Message}");
+                            socialMediaDataResponse.Errors.Add($"Embed Html error for '{t.EmbedUrl}': {e.Message}. Inner exception: {e.InnerException?.Message ?? "none"}");
                             continue;
                         }
                     }
