@@ -570,7 +570,7 @@ namespace DopamineDetoxFunction
 
             try
             {
-                terms = (List<string>)await _dopamineDetoxApiService.GetSearchTerms();
+                terms = (List<string>)await _dopamineDetoxApiService.GetSearchTerms(true);
             }
             catch
             {
@@ -613,7 +613,7 @@ namespace DopamineDetoxFunction
 
             try
             {
-                defaultTopics = await _dopamineDetoxApiService.GetDefaultTopics();
+                defaultTopics = await _dopamineDetoxApiService.GetDefaultTopics(true);
             }
             catch (Exception e)
             {

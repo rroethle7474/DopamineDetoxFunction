@@ -85,7 +85,7 @@ namespace DopamineDetoxFunction.Services
         #endregion
 
         #region SearchResults
-        public async Task<IEnumerable<string>> GetSearchTerms()
+        public async Task<IEnumerable<string>> GetSearchTerms(bool excludeTwitter = false)
         {
             const string cacheKey = "SearchTerms";
 
@@ -110,12 +110,23 @@ namespace DopamineDetoxFunction.Services
             try
             {
                 var subTopicData = await _subTopicService.GetSubTopicsAsync(stRequest, new CancellationToken());
+
+                if(excludeTwitter)
+                {
+                    subTopicData.Data = subTopicData?.Data?.Where(st => st.ExcludeFromTwitter != true).ToList();
+                }
+
                 var subTopics = subTopicData?.Data?
                                .GroupBy(st => st.Term?.Trim().ToLower())
                                .Select(g => g.First())
                                .ToList();
 
                 var topicData = await _topicService.GetTopicsAsync(tRequest, new CancellationToken());
+
+                if (excludeTwitter)
+                {
+                    topicData.Data = topicData?.Data?.Where(t => t.ExcludeFromTwitter != true).ToList();
+                }
 
                 var topics = topicData?.Data?.GroupBy(t => t.Term?.Trim().ToLower())
                 .Select(g => g.First())
@@ -460,7 +471,7 @@ namespace DopamineDetoxFunction.Services
 
 
         #region DefaultTopics
-        public async Task<List<string>> GetDefaultTopics()
+        public async Task<List<string>> GetDefaultTopics(bool excludeTwitter = false)
         {
             var defaultTopics = new List<string>();
             var defaultTopicsData = await _defaultTopicService.GetDefaultTopicsAsync(new CancellationToken());
@@ -472,7 +483,12 @@ namespace DopamineDetoxFunction.Services
             {
                 throw new Exception(defaultTopicsData?.Exception?.Message);
             }
-            
+
+            if (excludeTwitter)
+            {
+                defaultTopicsData.Data = defaultTopicsData.Data.Where(t => t.ExcludeFromTwitter != true).ToList();
+            }
+
             return defaultTopicsData.Data.Select(t => t.Term).ToList();
         }
         #endregion

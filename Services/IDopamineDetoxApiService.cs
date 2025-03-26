@@ -18,12 +18,12 @@ namespace DopamineDetoxFunction.Services
         #endregion
 
         #region DefaultTopics
-        Task<List<string>> GetDefaultTopics();
+        Task<List<string>> GetDefaultTopics(bool excludeTwitter = false);
         #endregion
 
         #region SearchResults
         Task<SearchResultsResponseDto> AddMultipleSearchResultsAsync(IEnumerable<SearchResultDto> searchResults);
-        Task<IEnumerable<string>> GetSearchTerms();
+        Task<IEnumerable<string>> GetSearchTerms(bool excludeTwitter = false);
         Task<IEnumerable<string>> GetMVPUserListAsync(SocialMediaDataResponse response);
         Task ClearMVPWeeklySearchResults(SocialMediaDataResponse response);
         #endregion
